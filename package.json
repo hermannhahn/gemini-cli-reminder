@@ -1,7 +1,7 @@
 {
 	"name": "gemini-cli-reminder",
-	"version": "0.1.0",
-	"description": "Powerful extension for scheduling reminders. Supports Jules, Gemini, and Ollama executors with relative time support.",
+	"version": "0.1.1",
+	"description": "Powerful task reminder system for Gemini CLI. Supports scheduling reminders with relative time support ('in 5 minutes').",
 	"keywords": [
 		"Reminder",
 		"Gemini",
