@@ -1,6 +1,6 @@
 {
 	"name": "gemini-cli-reminder",
-	"version": "0.1.7",
+	"version": "0.1.8",
 	"description": "Powerful task reminder system for Gemini CLI. Supports scheduling reminders with relative time support ('in 5 minutes').",
 	"mcpServers": {
 		"reminder": {
