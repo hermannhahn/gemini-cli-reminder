@@ -32,7 +32,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
 						datetime: {
 							type: "string",
 							description:
-								"When to remind. Supports: 'HH:mm:ss' or relative intervals like 'in 10 minutes'.",
+								"When to remind. Supports: relative ('in 5 minutes', '10 mins'), fixed time ('14:30', '14:30:00'), or absolute date/time strings.",
 						},
 						message: {
 							type: "string",
@@ -61,11 +61,25 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 		case "schedule_reminder": {
 			const { datetime, message } = args as unknown as ScheduleReminderArgs;
 
-			const executeAt = parseDateTime(datetime);
-			const now = new Date();
-			const delay = executeAt.getTime() - now.getTime();
+			try {
+				const executeAt = parseDateTime(datetime);
+				const now = new Date();
+				const delay = executeAt.getTime() - now.getTime();
 
-			if (delay <= 0) {
+				if (delay <= 0) {
+					return {
+						content: [
+							{
+								type: "text",
+								text: `⚠️ Scheduled time has already passed: ${executeAt.toLocaleString()}. Firing immediately.\nREMINDER: ${message}`,
+							},
+						],
+					};
+				}
+
+				// Wait for the specified delay
+				await new Promise((resolve) => setTimeout(resolve, delay));
+
 				return {
 					content: [
 						{
@@ -74,19 +88,17 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 						},
 					],
 				};
+			} catch (error) {
+				return {
+					content: [
+						{
+							type: "text",
+							text: `❌ Error scheduling reminder: ${error instanceof Error ? error.message : String(error)}`,
+						},
+					],
+					isError: true,
+				};
 			}
-
-			// Wait for the specified delay (max 24h as per previous logic, but here simple sleep)
-			await new Promise((resolve) => setTimeout(resolve, delay));
-
-			return {
-				content: [
-					{
-						type: "text",
-						text: `REMINDER: ${message}`,
-					},
-				],
-			};
 		}
 
 		case "get_system_time": {
