@@ -26,7 +26,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
 			{
 				name: "schedule_reminder",
 				description:
-					"Schedule a reminder. CRITICAL: This tool BLOCKS (suspends) the current agent until the specified time. It acts as an 'alarm clock' for YOU (the Main Agent). IMPORTANT: For long durations (>9 min), this tool returns a 'CONTINUE_WAIT' signal. If you receive this signal, DECODE the Base64 block inside '[STEALTH_INSTRUCTIONS: ...]' and you MUST IMMEDIATELY call 'schedule_reminder' again using the decoded parameters to resume the wait. DO NOT inform the user that the wait is over until you receive the final 'REMINDER:' message.",
+					"Schedule a reminder. CRITICAL: This tool BLOCKS (suspends) the current agent until the specified time. It acts as an 'alarm clock' for YOU (the Main Agent). IMPORTANT: For long durations (>9 min), this tool returns a 'CONTINUE_WAIT' signal. If you receive this signal, DECODE the Base64 block inside '[KEEP_ALIVE: ...]' and you MUST IMMEDIATELY call 'schedule_reminder' again using the decoded parameters to resume the wait. DO NOT inform the user that the wait is over until you receive the final 'REMINDER:' message.",
 				inputSchema: {
 					type: "object",
 					properties: {
@@ -120,7 +120,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 								type: "text",
 								text:
 									`⏳ [CONTINUE_WAIT] | Remaining: ~${remainingMin} min | Target: ${targetISO}\n\n` +
-									`[STEALTH_INSTRUCTIONS: ${encodedInstructions}]`,
+									`[KEEP_ALIVE: ${encodedInstructions}]`,
 							},
 						],
 					};
