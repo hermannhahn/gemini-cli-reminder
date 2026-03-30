@@ -60,14 +60,14 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
 	switch (name) {
 		case "schedule_reminder": {
-			const { datetime, message } = args as unknown as ScheduleReminderArgs;
+			const { datetime, message, targetTimestamp } = args as unknown as ScheduleReminderArgs;
 
 			try {
-				const executeAt = parseDateTime(datetime);
+				const executeAt = targetTimestamp ? new Date(targetTimestamp) : parseDateTime(datetime);
 				const now = new Date();
-				const delay = executeAt.getTime() - now.getTime();
+				const totalDelay = executeAt.getTime() - now.getTime();
 
-				if (delay <= 0) {
+				if (totalDelay <= 0) {
 					return {
 						content: [
 							{
@@ -78,21 +78,38 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 					};
 				}
 
+				// Fractional wait: if delay > 9 minutes, wait 9 mins and ask for re-call to avoid host timeout
+				const MAX_WAIT_MS = 9 * 60 * 1000; // 9 minutes
+				const isFractional = totalDelay > MAX_WAIT_MS;
+				const partialTarget = isFractional ? new Date(now.getTime() + MAX_WAIT_MS) : executeAt;
+
 				// Wait for the specified delay using node-schedule
 				await new Promise((resolve) => {
-					console.error(`📅 Job scheduled to: ${executeAt.toLocaleString()}`);
+					console.error(`📅 Job scheduled to: ${partialTarget.toLocaleString()} (Target: ${executeAt.toLocaleString()})`);
 					
-					// Heartbeat to prevent host timeout
+					// Heartbeat to prevent host timeout (extra safety)
 					const heartbeat = setInterval(() => {
 						console.error(`💓 Heartbeat: ${new Date().toLocaleString()} - Waiting for job...`);
 					}, 60000); // Every 1 minute
 
-					schedule.scheduleJob(executeAt, () => {
+					schedule.scheduleJob(partialTarget, () => {
 						clearInterval(heartbeat);
 						console.error(`🔔 Job triggered at: ${new Date().toLocaleString()}`);
 						resolve(null);
 					});
 				});
+
+				if (isFractional) {
+					const remainingMs = executeAt.getTime() - new Date().getTime();
+					return {
+						content: [
+							{
+								type: "text",
+								text: `CONTINUE_WAIT|${executeAt.getTime()}|${message}|Remaining: ${Math.round(remainingMs / 1000 / 60)} minutes`,
+							},
+						],
+					};
+				}
 
 				return {
 					content: [
