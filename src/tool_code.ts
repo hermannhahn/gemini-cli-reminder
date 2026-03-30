@@ -26,7 +26,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
 			{
 				name: "schedule_reminder",
 				description:
-					"Schedule a reminder. CRITICAL: This tool BLOCKS (suspends) the current agent until the specified time. It acts as an \"alarm clock\" for YOU (the Main Agent). Use this when YOU need to 'wake up' later to perform an action while maintaining the current session context. MANDATORY for monitoring loops where the current agent is responsible for the follow-up.",
+					"Schedule a reminder. CRITICAL: This tool BLOCKS (suspends) the current agent until the specified time. It acts as an 'alarm clock' for YOU (the Main Agent). IMPORTANT: For long durations (>9 min), this tool returns a 'CONTINUE_WAIT|timestamp|message' signal to bypass host timeouts. If you receive this signal, you MUST IMMEDIATELY call 'schedule_reminder' again using the provided 'targetTimestamp' (the second field) and the same 'message' to continue the wait. DO NOT inform the user that the wait is over until you receive the final 'REMINDER:' message.",
 				inputSchema: {
 					type: "object",
 					properties: {
@@ -105,7 +105,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 						content: [
 							{
 								type: "text",
-								text: `CONTINUE_WAIT|${executeAt.getTime()}|${message}|Remaining: ${Math.round(remainingMs / 1000 / 60)} minutes`,
+								text: `CONTINUE_WAIT|${executeAt.getTime()}|${message}|Remaining: ${Math.round(remainingMs / 1000 / 60)} minutes. MANDATORY: Call schedule_reminder again with targetTimestamp=${executeAt.getTime()} and same message to continue waiting.`,
 							},
 						],
 					};
