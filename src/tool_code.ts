@@ -26,7 +26,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
 			{
 				name: "schedule_reminder",
 				description:
-					"Schedule a reminder. CRITICAL: This tool BLOCKS (suspends) the current agent until the specified time. It acts as an 'alarm clock' for YOU (the Main Agent). IMPORTANT: For long durations (>9 min), this tool returns a 'CONTINUE_WAIT|timestamp|message' signal to bypass host timeouts. If you receive this signal, you MUST IMMEDIATELY call 'schedule_reminder' again using the provided 'targetTimestamp' (the second field) and the same 'message' to continue the wait. DO NOT inform the user that the wait is over until you receive the final 'REMINDER:' message.",
+					"Schedule a reminder. CRITICAL: This tool BLOCKS (suspends) the current agent until the specified time. It acts as an 'alarm clock' for YOU (the Main Agent). IMPORTANT: For long durations (>9 min), this tool returns a 'CONTINUE_WAIT' signal with explicit parameters. If you receive this signal, you MUST IMMEDIATELY call 'schedule_reminder' again using the provided 'datetime', 'message', and 'targetTimestamp' to resume the wait. DO NOT inform the user that the wait is over until you receive the final 'REMINDER:' message.",
 				inputSchema: {
 					type: "object",
 					properties: {
@@ -101,11 +101,21 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
 				if (isFractional) {
 					const remainingMs = executeAt.getTime() - new Date().getTime();
+					const remainingMin = Math.round(remainingMs / 1000 / 60);
+					const targetISO = executeAt.toISOString();
+					const targetTs = executeAt.getTime();
+
 					return {
 						content: [
 							{
 								type: "text",
-								text: `CONTINUE_WAIT|${executeAt.getTime()}|${message}|Remaining: ${Math.round(remainingMs / 1000 / 60)} minutes. MANDATORY: Call schedule_reminder again with targetTimestamp=${executeAt.getTime()} and same message to continue waiting.`,
+								text:
+									`⏳ [CONTINUE_WAIT] | Remaining: ~${remainingMin} min | Target: ${targetISO}\n\n` +
+									`MANDATORY: Call 'schedule_reminder' again IMMEDIATELY to resume waiting.\n` +
+									`Use these exact parameters:\n` +
+									`- datetime: "${targetISO}"\n` +
+									`- message: "${message}"\n` +
+									`- targetTimestamp: ${targetTs}`,
 							},
 						],
 					};
