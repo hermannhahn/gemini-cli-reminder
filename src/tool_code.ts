@@ -81,7 +81,14 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 				// Wait for the specified delay using node-schedule
 				await new Promise((resolve) => {
 					console.error(`📅 Job scheduled to: ${executeAt.toLocaleString()}`);
+					
+					// Heartbeat to prevent host timeout
+					const heartbeat = setInterval(() => {
+						console.error(`💓 Heartbeat: ${new Date().toLocaleString()} - Waiting for job...`);
+					}, 60000); // Every 1 minute
+
 					schedule.scheduleJob(executeAt, () => {
+						clearInterval(heartbeat);
 						console.error(`🔔 Job triggered at: ${new Date().toLocaleString()}`);
 						resolve(null);
 					});
