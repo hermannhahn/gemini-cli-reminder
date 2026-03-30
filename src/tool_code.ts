@@ -6,6 +6,7 @@ import {
 } from "@modelcontextprotocol/sdk/types.js";
 import { ScheduleReminderArgs } from "./types";
 import { parseDateTime } from "./utils";
+import * as schedule from "node-schedule";
 
 const server = new Server(
 	{
@@ -77,8 +78,14 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 					};
 				}
 
-				// Wait for the specified delay
-				await new Promise((resolve) => setTimeout(resolve, delay));
+				// Wait for the specified delay using node-schedule
+				await new Promise((resolve) => {
+					console.error(`📅 Job scheduled to: ${executeAt.toLocaleString()}`);
+					schedule.scheduleJob(executeAt, () => {
+						console.error(`🔔 Job triggered at: ${new Date().toLocaleString()}`);
+						resolve(null);
+					});
+				});
 
 				return {
 					content: [
