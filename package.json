@@ -1,6 +1,6 @@
 {
 	"name": "gemini-cli-reminder",
-	"version": "0.1.13",
+	"version": "0.1.14",
 	"description": "Powerful task reminder system for Gemini CLI. Supports scheduling reminders with relative time support ('in 5 minutes').",
 	"keywords": [
 		"Reminder",
@@ -32,8 +32,10 @@
 		"deploy": "git checkout main && git pull origin main && git merge development --no-edit && npm run lint && npx webpack && git add tool_code.js && git commit -m 'chore: build tool_code.js for release' || true && git push origin main && node -e \"const v = require('./package.json').version; require('child_process').execSync('git tag -f v' + v + ' && git push origin -f v' + v, {stdio: 'inherit'})\" && npm run push:release && npm run cleanup-releases && npm run update && git checkout development"
 	},
 	"gemini-dependencies": {
+		"gemini-cli-scheduler": "https://github.com/hermannhahn/gemini-cli-scheduler",
 		"gemini-cli-reminder": "https://github.com/hermannhahn/gemini-cli-reminder",
-		"gemini-cli-voice": "https://github.com/hermannhahn/gemini-cli-voice"
+		"gemini-cli-voice": "https://github.com/hermannhahn/gemini-cli-voice",
+		"superpowers": "https://github.com/obra/superpowers"
 	},
 	"dependencies": {
 		"@modelcontextprotocol/sdk": "^1.28.0",
