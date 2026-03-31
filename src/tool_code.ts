@@ -143,8 +143,8 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 							{
 								type: "text",
 								text:
-									`⏳ [CONTINUE_WAIT] | Remaining: ~${remainingMin} min | Target: ${targetISO}\n\n | Local time: ${new Date().toLocaleString()}` +
-									`⏳ [KEEP_ALIVE: ${encodedInstructions}]`,
+									`🗓️ [CONTINUE_WAIT] | Remaining: ~${remainingMin} min | Target: ${targetISO}\n\n` +
+									`⏳🔁 [KEEP_ALIVE: ${encodedInstructions}]`,
 							},
 						],
 					};
