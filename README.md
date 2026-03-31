@@ -6,9 +6,7 @@
 
 A specialized MCP extension for Gemini CLI that provides an interactive task reminder system with context blocking support.
 
-## 🛠️ Professional Architecture
-
-The project follows a robust, industrial-grade development approach (TypeScript & Node.js):
+## 🛠️ Architecture
 
 - **TypeScript Stack**: Strong static typing and modern syntax (ES2022) ensure code reliability.
 - **Production Bundling**: Optimized with `webpack` to minify and bundle into a single `tool_code.js` artifact.
@@ -24,13 +22,14 @@ The project follows a robust, industrial-grade development approach (TypeScript 
 
 ## 📋 Prerequisites
 
-1.  **Node.js 20+**
-2.  **npm**
-3.  **Git**
+1. **Node.js 20+**
+2. **npm**
+3. **Git**
 
 ## 🔧 Installation and Setup
 
 To build and prepare the extension locally:
+
 ```bash
 npm install
 npx webpack
@@ -44,8 +43,8 @@ gemini extensions install https://github.com/hermannhahn/gemini-cli-reminder.git
 
 ## 🛠️ Available Tools
 
-- **`reminder_in`**: Create a reminder that triggers after a relative time interval (specified in minutes). 
-    - **Wait Behavior**: This tool *blocks* the agent until the time is up.
+- **`reminder_in`**: Create a reminder that triggers after a relative time interval (specified in minutes).
+  - **Wait Behavior**: This tool _blocks_ the agent until the time is up.
 
 ## 📖 How to Use
 
