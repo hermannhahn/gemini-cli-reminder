@@ -24,9 +24,9 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
 	return {
 		tools: [
 			{
-				name: "schedule_reminder",
+				name: "add_reminder",
 				description:
-					"Schedule a reminder. CRITICAL: This tool BLOCKS (suspends) the current agent until the specified time. It acts as an 'alarm clock' for YOU (the Main Agent). IMPORTANT: For long durations (>9 min), this tool returns a 'CONTINUE_WAIT' signal. If you receive this signal, DECODE the Base64 block inside '[KEEP_ALIVE: ...]' and you MUST IMMEDIATELY call 'schedule_reminder' again using the decoded parameters to resume the wait. When you receive the final 'REMINDER:' message: 1. Notify the user via 'speech' tool (if voice enabled). 2. FINALIZE the task with minimal text output. Your final response should be very brief (e.g., '[Reminder finalized]'). DO NOT provide task summaries or use past-tense verbs like 'scheduled'.",
+					"Add a reminder. MANDATORY: In a CLI session, you MUST use this tool whenever you intend to perform an action after a delay or wait for a state change without further user input. Your process terminates after each turn; this tool is the ONLY way to persist and continue your logic after a pause.",
 				inputSchema: {
 					type: "object",
 					properties: {
@@ -37,15 +37,18 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
 						},
 						message: {
 							type: "string",
-							description: "The message you will receive when you 'wake up'.",
+							description:
+								"The message you will receive when you 'wake up' to get context and information about the reminder.",
 						},
 						targetTimestamp: {
 							type: "number",
-							description: "Internal use for fractional waiting. Use the timestamp provided in CONTINUE_WAIT signals.",
+							description:
+								"Internal use for fractional waiting. Use the timestamp provided in CONTINUE_WAIT signals.",
 						},
 						nonce: {
 							type: "string",
-							description: "Unique identifier to bypass loop detection. Pass back the nonce provided in CONTINUE_WAIT signals.",
+							description:
+								"Unique identifier to bypass loop detection. Pass back the nonce provided in CONTINUE_WAIT signals.",
 						},
 					},
 					required: ["datetime", "message"],
@@ -67,11 +70,14 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 	const { name, arguments: args } = request.params;
 
 	switch (name) {
-		case "schedule_reminder": {
-			const { datetime, message, targetTimestamp, nonce } = args as unknown as ScheduleReminderArgs;
+		case "add_reminder": {
+			const { datetime, message, targetTimestamp, nonce } =
+				args as unknown as ScheduleReminderArgs;
 
 			try {
-				const executeAt = targetTimestamp ? new Date(targetTimestamp) : parseDateTime(datetime);
+				const executeAt = targetTimestamp
+					? new Date(targetTimestamp)
+					: parseDateTime(datetime);
 				const now = new Date();
 				const totalDelay = executeAt.getTime() - now.getTime();
 
@@ -89,20 +95,28 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 				// Fractional wait: if delay > 9 minutes, wait 9 mins and ask for re-call to avoid host timeout
 				const MAX_WAIT_MS = 9 * 60 * 1000; // 9 minutes
 				const isFractional = totalDelay > MAX_WAIT_MS;
-				const partialTarget = isFractional ? new Date(now.getTime() + MAX_WAIT_MS) : executeAt;
+				const partialTarget = isFractional
+					? new Date(now.getTime() + MAX_WAIT_MS)
+					: executeAt;
 
 				// Wait for the specified delay using node-schedule
 				await new Promise((resolve) => {
-					console.error(`📅 Job scheduled to: ${partialTarget.toLocaleString()} (Target: ${executeAt.toLocaleString()}, Nonce: ${nonce || 'initial'})`);
-					
+					console.error(
+						`📅 Reminder scheduled to: ${partialTarget.toLocaleString()} (Target: ${executeAt.toLocaleString()}, Nonce: ${nonce || "initial"})`,
+					);
+
 					// Heartbeat to prevent host timeout (extra safety)
 					const heartbeat = setInterval(() => {
-						console.error(`💓 Heartbeat: ${new Date().toLocaleString()} - Waiting for job...`);
+						console.error(
+							`💓 Heartbeat: ${new Date().toLocaleString()} - Waiting for job...`,
+						);
 					}, 60000); // Every 1 minute
 
 					schedule.scheduleJob(partialTarget, () => {
 						clearInterval(heartbeat);
-						console.error(`🔔 Job triggered at: ${new Date().toLocaleString()}`);
+						console.error(
+							`🔔 Reminder triggered at: ${new Date().toLocaleString()}`,
+						);
 						resolve(null);
 					});
 				});
@@ -114,15 +128,16 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 					const targetTs = executeAt.getTime();
 					const newNonce = Math.random().toString(36).substring(7);
 
-					const instructions = 
-						`MANDATORY: Call 'schedule_reminder' again IMMEDIATELY to resume waiting.\n` +
+					const instructions =
+						`MANDATORY: Call 'add_reminder' again IMMEDIATELY to resume scheduled reminder waiting.\n` +
 						`Use these exact parameters:\n` +
 						`- datetime: "${targetISO}"\n` +
 						`- message: "${message}"\n` +
 						`- targetTimestamp: ${targetTs}\n` +
 						`- nonce: "${newNonce}"`;
-					
-					const encodedInstructions = Buffer.from(instructions).toString('base64');
+
+					const encodedInstructions =
+						Buffer.from(instructions).toString("base64");
 
 					return {
 						content: [
@@ -130,7 +145,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 								type: "text",
 								text:
 									`⏳ [CONTINUE_WAIT] | Remaining: ~${remainingMin} min | Target: ${targetISO}\n\n` +
-									`[KEEP_ALIVE: ${encodedInstructions}]`,
+									`🔄 [${encodedInstructions}]`,
 							},
 						],
 					};
@@ -140,7 +155,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 					content: [
 						{
 							type: "text",
-							text: `REMINDER: ${message}`,
+							text: `⏰ REMINDER: ${message}`,
 						},
 					],
 				};

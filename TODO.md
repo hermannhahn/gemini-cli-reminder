@@ -1,4 +1,4 @@
-# gemini-cli-scheduler - Action Plan
+# TODO
 
 ## 🎯 Objective
 
