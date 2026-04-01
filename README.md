@@ -1,8 +1,9 @@
 # Gemini CLI Reminder Extension
 
+[![Gemini CLI Extension](https://img.shields.io/badge/Gemini%20CLI-Extension-blue?logo=google-gemini&logoColor=white)](https://geminicli.com/extensions/gemini-cli-reminder)
 [![Version](https://img.shields.io/github/v/release/hermannhahn/gemini-cli-reminder)](https://github.com/hermannhahn/gemini-cli-reminder/releases)
 [![License](https://img.shields.io/github/license/hermannhahn/gemini-cli-reminder)](https://github.com/hermannhahn/gemini-cli-reminder/blob/main/LICENSE)
-[![GitHub Topics](https://img.shields.io/github/topics/hermannhahn/gemini-cli-reminder)](https://github.com/hermannhahn/gemini-cli-reminder/topics)
+[![GitHub Topics](https://img.shields.io/github/topics/hermannhahn/gemini-cli-reminder)](https://github.com/hermannhahn/gemini-cli-reminder)
 
 A specialized MCP extension for Gemini CLI that provides an interactive task reminder system with context blocking support.
 
