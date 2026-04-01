@@ -51,6 +51,7 @@ gemini extensions install https://github.com/hermannhahn/gemini-cli-reminder.git
 Thinking of this as an **alarm clock for YOU** (the current agent). Use it for monitoring loops or when you must maintain the exact context of the current conversation to proceed.
 
 > "Set a reminder for 10 minutes to check the server logs."
+> "Check the database connection every 30 minutes and report any issues."
 
 ## 🤝 Contributing
 
