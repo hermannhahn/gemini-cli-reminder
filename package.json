@@ -23,16 +23,12 @@
 		"lint": "eslint 'src/**/*.ts' --fix",
 		"test": "echo \"No tests specified\" && exit 0",
 		"webpack": "npx webpack",
+		"build": "npx webpack",
 		"cleanup-releases": "node scripts/cleanup-releases.js",
 		"push:version": "git add . && node -e \"const v = require('./package.json').version; require('child_process').execSync('git commit -m \\\"chore: bump version to ' + v + '\\\"', {stdio: 'inherit'})\" && git push origin development",
 		"push:release": "node -e \"const v = require('./package.json').version; require('child_process').execSync('gh release create v' + v + ' --generate-notes', {stdio: 'inherit'})\"",
 		"update:version": "npm run lint && npm version patch --no-git-tag-version && node scripts/update-version.js && npx webpack && npm run push:version",
-		"update": "echo 'Y' | gemini extension update gemini-cli-reminder && echo 'Restart Gemini CLI to apply the update.'",
-		"deploy": "git checkout main && git pull origin main && git merge development --no-edit && npm run lint && npx webpack && git add tool_code.js && git commit -m 'chore: build tool_code.js for release' || true && git push origin main && node -e \"const v = require('./package.json').version; require('child_process').execSync('git tag -f v' + v + ' && git push origin -f v' + v, {stdio: 'inherit'})\" && npm run push:release && npm run update && git checkout development"
-	},
-	"gemini-dependencies": {
-		"gemini-cli-reminder": "https://github.com/hermannhahn/gemini-cli-reminder",
-		"gemini-cli-voice": "https://github.com/hermannhahn/gemini-cli-voice"
+		"deploy": "git checkout main && git pull origin main && npm run lint && npx webpack && git add tool_code.js && git commit -m 'chore: build tool_code.js for release' || true && git push origin main && node -e \"const v = require('./package.json').version; require('child_process').execSync('git tag -f v' + v + ' && git push origin -f v' + v, {stdio: 'inherit'})\" && npm run push:release"
 	},
 	"dependencies": {
 		"@modelcontextprotocol/sdk": "^1.28.0",
